@@ -114,23 +114,31 @@ pic_count = 0
 #   grid.training[count,] = c(s.max.estimated[1],s.max.estimated[2])
 #   
 # }
-# grid.training[11,] = c(0.6,0.6)
+# grid.training[11,] = c(0.6,0.6
+prev_training_size = 0
 
 while(count < 50)
 {
+
   
+
 grid.training = matrix(0, nrow=0, ncol=2)
   
-pythondata = read.csv("foo.csv")
+pythondata = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv");
   
 for (i in 1:dim(pythondata)[1])
   {
     
-    print(pythondata[i,1])
+    
     grid.training = rbind(grid.training,c(pythondata[i,1],pythondata[i,2]))
     
-  }  
-  
+  }
+
+training_size = dim(grid.training)[1]
+
+if(training_size != prev_training_size)
+{
+prev_training_size = training_size  
 ngrid.training = dim(grid.training)[1]
 towrite = 5
 
@@ -427,6 +435,10 @@ else
 count = count + 1
 
 init = 1
+}
+else
+{Sys.sleep(0.2) 
+ print(paste("NO NEW DATA!!!")) }
 }
 
 # for(i in 1:81)

@@ -7,14 +7,18 @@ Created on Wed Nov 12 10:19:18 2014
 
 import csv
 import numpy
-A = ['V1', 'V2']
-with open('foo.csv', 'rb') as f:
+A = []
+i_row = 0
+with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv', 'rb') as f:
     reader = csv.reader(f)
     for row in reader:
-        print row
-        A = numpy.vstack([A,row])
+        if i_row == 0:
+            A.append(row)
+            i_row+=1
+        else:
+            A = numpy.vstack([A,row])
         
         
-with open('foowrite.csv', 'wb') as f:
+with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb') as f:
     writer = csv.writer(f)
     writer.writerows(A)
