@@ -39,7 +39,7 @@ e="gndspeed"
 
 
 Script.SendRC(3,1500,True)
-Script.Sleep(3000)
+Script.Sleep(6000)
 Script.SendRC(3,1000,True)
 
 init_alt = 0
