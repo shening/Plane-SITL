@@ -1,6 +1,6 @@
 import socket
 import re
-
+import time
 import numpy
 import csv
 
@@ -65,12 +65,12 @@ msg = '|'+'alt'+'|'+str(alt)+'|'+'lat'+'|'+str(lat)+'|'+'lng'+'|'+str(lng)+'|'
 wp_count += 1
 conn.send(msg)
 print msg
-time_count = 0
 
 
-Plane_pos = ['V1' 'V2']
 
+Plane_pos = ['V1', 'V2']
 
+start_time = time.time()
 
 while True:
  
@@ -91,13 +91,15 @@ while True:
     
     print 'Running 1'
     try:
+        print 'Receiving Data'
         data = conn.recv(BUFFER_SIZE)
     except:
+        print 'Trying to reconnect'
         conn, addr = s.accept()
         conn.settimeout(5.0)
         
     list = re.split('\|+',data)
-    
+    print 'Running 2'
     for position, item in enumerate(list):
         if item == "alt":
             print "Altitude:", list[position+1]
@@ -114,18 +116,23 @@ while True:
             cur_lng = float(list[position+1])
             cur_x = (cur_lng - float(plume_box[4][9]))/DeltaLong
             cur_pos = [cur_x, cur_y]
-            Plane_pos = numpy.vstack([Plane_pos,cur_pos])
-            with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb') as Pl_file:
-                writer = csv.writer(Pl_file)
-                writer.writerows(Plane_pos)
-            
+            cur_time = time.time()
+            if float(cur_time - start_time) > 5:
+                start_time = cur_time
+                
+                Plane_pos = numpy.vstack([Plane_pos,cur_pos])
+                print 'Writing Currest Plane position'
+                with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb') as Pl_file:
+                    writer = csv.writer(Pl_file)
+                    writer.writerows(Plane_pos)
+                    Pl_file.close()
         elif item == "gndspeed":
             print "Groundspeed:", list[position+1]
             cur_gndspeed = list[position+1]
         elif item == "wpdst":
             print "Waypoint distance:", list[position+1]
             wp_dst = float(list[position+1])
-            time_count = time_count + 1
+         
             print 'Checking wpdst'
             if wp_dst < 100:
                 
@@ -136,7 +143,12 @@ while True:
                 alt = 100
                 msg = '|'+'alt'+'|'+str(alt)+'|'+'lat'+'|'+str(lat)+'|'+'lng'+'|'+str(lng)+'|'
                 wp_count += 1
-
+                for i in range(1,10):
+                    conn.send(msg)
+                    data = conn.recv(BUFFER_SIZE)
+                    
+            
+                
                 
                 
              

@@ -42,79 +42,7 @@ init = 0
 zlim <- c(0,1.5)
 pic_count = 0
 
-##Generate the "training" data from the 9 way oints (actually, the training data might be larger because we will also be sampling between waypoints, but don't worry about that for now).
 
-# 
-# grid.training[1,] = c(0.1,0.5)
-# grid.training[2,] = c(0.5,0.9)
-# grid.training[3,] = c(0.9,0.5)
-# grid.training[4,] = c(0.5,0.1)
-# grid.training[5,] = c(0.2,0.2)
-# grid.training[6,] = c(0.2,0.8)
-# grid.training[7,] = c(0.8,0.8)
-# grid.training[8,] = c(0.8,0.2)
-# grid.training[9,] = c(0.5,0.5)
-
-
-# grid.training[7,] = c(0.2,0.1)
-# grid.training[2,] = c(0.1,0.2)
-# grid.training[3,] = c(0.8,0)
-# grid.training[4,] = c(0.6,0)
-# grid.training[5,] = c(1,0.3)
-# grid.training[6,] = c(1,0.1)
-# grid.training[1,] = c(1,0.2)
-
-#BAD+++++++++++++++++++++
-# grid.training[1,] = c(0.1,0.1)
-# grid.training[2,] = c(0.2,0.1)
-# grid.training[3,] = c(0.3,0.1)
-# grid.training[6,] = c(0.1,0.2)
-# grid.training[5,] = c(0.2,0.2)
-# grid.training[4,] = c(0.3,0.2)
-# grid.training[7,] = c(0.1,0.4)
-# 
-# grid.training[8,] = c(0.2,0.4)
-# grid.training[9,] = c(0.3,0.4)
-# ++++++++++++++++++
-
-
-# 
-# grid.training[1,] = c(0.2,0.1)
-# grid.training[2,] = c(0.4,0.1)
-# grid.training[3,] = c(0.6,0.1)
-# grid.training[6,] = c(0.2,0.3)
-# grid.training[5,] = c(0.4,0.3)
-# grid.training[4,] = c(0.6,0.3)
-# grid.training[7,] = c(0.2,0.6)
-# 
-# grid.training[8,] = c(0.4,0.6)
-# grid.training[9,] = c(0.6,0.6)
-
-
-
-
-
-# grid.training[3,] = c(0.3,0.1)
-# grid.training[6,] = c(0.1,0.2)
-# grid.training[5,] = c(0.2,0.2)
-# grid.training[4,] = c(0.3,0.2)
-# grid.training[7,] = c(0.1,0.4)
-# 
-# grid.training[8,] = c(0.2,0.4)
-# grid.training[9,] = c(0.3,0.4)
-
-# 
-# grid.training[10,] = c(0.9,0.1)
-# grid.training[11,] = c(0.9,0.4)
-# grid.training[12,] = c(0.9,0.6)
-# grid.training[13,] = c(0.9,0.4)
-# grid.training[14,] = c(0.9,0.5)
-# if(count > 9 )
-# {
-#   grid.training[count,] = c(s.max.estimated[1],s.max.estimated[2])
-#   
-# }
-# grid.training[11,] = c(0.6,0.6
 prev_training_size = 0
 
 while(count < 50)
@@ -142,12 +70,7 @@ prev_training_size = training_size
 ngrid.training = dim(grid.training)[1]
 towrite = 5
 
-# for(i in dim(grid.training)[1])
-#      {
-#  
-#   towrite = append(towrite, grid.training[i,])
-# }
-# write(towrite, file = "dataTest", ncolumns = 1000, sep = ",")
+
 ##Generate the grid over which predictions will be made
 ngrid = 50
 grid  = matrix(0, nrow=ngrid*ngrid, ncol=2)
@@ -176,16 +99,7 @@ par(mar=c(4,4,1,1)+0.2)
 image.plot(matrix(truehumidity, nrow=ngrid, ncol=ngrid),col = heat.colors(100),  ylab="Longitude", xlab="Latitude")
 title(main = "Actual Plume", font.main = 4)
 points(grid.training[,1], grid.training[,2], pch=19)
-#lines(grid.training)
-# text(grid.training[1,1]+0.02, grid.training[1,2]-0.02, expression(paste(s[1])))
-# text(grid.training[2,1]+0.02, grid.training[2,2]-0.02, expression(paste(s[2])))
-# text(grid.training[3,1]+0.02, grid.training[3,2]-0.02, expression(paste(s[3])))
-# text(grid.training[4,1]+0.02, grid.training[4,2]-0.02, expression(paste(s[4])))
-# text(grid.training[5,1]+0.02, grid.training[5,2]-0.02, expression(paste(s[5])))
-# text(grid.training[6,1]+0.02, grid.training[6,2]-0.02, expression(paste(s[6])))
-# text(grid.training[7,1]+0.02, grid.training[7,2]-0.02, expression(paste(s[7])))
-# text(grid.training[8,1]+0.02, grid.training[8,2]-0.02, expression(paste(s[8])))
-# text(grid.training[9,1]+0.02, grid.training[9,2]-0.02, expression(paste(s[9])))
+
 dev.print(dev=pdf, file="poc_true.pdf")
 dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
 dev.off ();
@@ -218,23 +132,7 @@ marginal.likelihood=function(hyper.params,measurements,points){
 ########################################################################
 ##Do the actual work
 y = traininghumidity
-#  for(i in 1:9)
-# 	{
-# 	   if(i <= count)
-# 	   {
-# 	   	y[i] = traininghumidity[i]
-# 	   }
-# 	   else
-# 	     {
-#               y[i] = 0
-# 	     }
-# 	}
-# i =0
-##These are naive, off-the-shelve values for the parameters controlling smoothing and interpolation.  A real excersice would aim at getting these values as part of the monitoring procedure, but I am trying to keep it as simple as possible for now
-# beta = mean(y)
-# sigma2 = 0.2*var(y)
-# tau2   = 0.8*var(y)
-# lambda = sqrt(2)/3  ##This is the maximum distance between any two points in the map, divided by 3.  Don't ask why :)
+
 
 ## Get the maximum of the marginal likelihood and extract the empirical Bayes estimates for the parameters.
 opt=constrOptim(c(.47,sqrt(var(y)),sqrt(var(y))),marginal.likelihood,NULL,diag(,3),rep(1e-6,3),measurements=y,points=grid.training)
@@ -285,15 +183,7 @@ par(mar=c(4,4,1,1)+0.2)
 image.plot(matrix(EI, nrow=ngrid, ncol=ngrid),col = heat.colors(100),  ylab="Longitude", xlab="Latitude")
 title(main = "Expected Improvement", font.main = 4)
 points(grid.training[,1], grid.training[,2], pch=19)
-# text(grid.training[1,1]+0.02, grid.training[1,2]-0.02, expression(paste(s[1])))
-# text(grid.training[2,1]+0.02, grid.training[2,2]-0.02, expression(paste(s[2])))
-# text(grid.training[3,1]+0.02, grid.training[3,2]-0.02, expression(paste(s[3])))
-# text(grid.training[4,1]+0.02, grid.training[4,2]-0.02, expression(paste(s[4])))
-# text(grid.training[5,1]+0.02, grid.training[5,2]-0.02, expression(paste(s[5])))
-# text(grid.training[6,1]+0.02, grid.training[6,2]-0.02, expression(paste(s[6])))
-# text(grid.training[7,1]+0.02, grid.training[7,2]-0.02, expression(paste(s[7])))
-# text(grid.training[8,1]+0.02, grid.training[8,2]-0.02, expression(paste(s[8])))
-# text(grid.training[9,1]+0.02, grid.training[9,2]-0.02, expression(paste(s[9])))
+
 points(s.max.EI.estimated[1], s.max.EI.estimated[2], pch=19)
 text(s.max.EI.estimated[1]+.02, s.max.EI.estimated[2]+0.02, paste("Max EI:",EI[which.max(EI)]), pos=4)
 dev.print(dev=pdf, file="expectedimprovement_est.pdf")
@@ -320,15 +210,7 @@ par(mar=c(4,4,1,1)+0.2)
 image.plot(matrix(y.mean, nrow=ngrid, ncol=ngrid), col = heat.colors(100),ylab="Longitude", xlab="Latitude")
 title(main = "Predicted Plume", font.main = 4)
 points(grid.training[,1], grid.training[,2], pch=19)
-# text(grid.training[1,1]+0.02, grid.training[1,2]-0.02, expression(paste(s[1])))
-# text(grid.training[2,1]+0.02, grid.training[2,2]-0.02, expression(paste(s[2])))
-# text(grid.training[3,1]+0.02, grid.training[3,2]-0.02, expression(paste(s[3])))
-# text(grid.training[4,1]+0.02, grid.training[4,2]-0.02, expression(paste(s[4])))
-# text(grid.training[5,1]+0.02, grid.training[5,2]-0.02, expression(paste(s[5])))
-# text(grid.training[6,1]+0.02, grid.training[6,2]-0.02, expression(paste(s[6])))
-# text(grid.training[7,1]+0.02, grid.training[7,2]-0.02, expression(paste(s[7])))
-# text(grid.training[8,1]+0.02, grid.training[8,2]-0.02, expression(paste(s[8])))
-# text(grid.training[9,1]+0.02, grid.training[9,2]-0.02, expression(paste(s[9])))
+
 points(s.max.f.estimated[1], s.max.EI.estimated[2], pch=19)
 text(s.max.f.estimated[1]+.02, s.max.EI.estimated[2]+0.02, "Estimated maximum", pos=4)
 dev.print(dev=pdf, file="function_est.pdf")
@@ -337,12 +219,7 @@ dev.off ();
 pic_count = pic_count+1
 Sys.sleep(0.2) 
 
-# if(count == 9)
-# {count = 0
-# }
-# count = count + 1
-# grid.training[1,] = c(s.max.estimated[1],s.max.estimated[2])
-# 
+
 print("DONE FIRST RUN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 
@@ -441,12 +318,7 @@ else
  print(paste("NO NEW DATA!!!")) }
 }
 
-# for(i in 1:81)
-# {
-#   print(i)
-#   points(i/10, i/10, pch=12)
-#   Sys.sleep(1) 
-# }
+
 
 # dev.set(dev.list()[1])
 
