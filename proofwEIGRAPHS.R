@@ -45,7 +45,7 @@ pic_count = 0
 
 prev_training_size = 0
 
-while(count < 50)
+while(count < 2000)
 {
 
   

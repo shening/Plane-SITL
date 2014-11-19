@@ -134,7 +134,7 @@ while True:
             wp_dst = float(list[position+1])
          
             print 'Checking wpdst'
-            if wp_dst < 100:
+            if wp_dst < 70:
                 
                 x = float(A[wp_count][0])
                 y = float(A[wp_count][1])
