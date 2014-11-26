@@ -31,7 +31,8 @@ humidity = function(s,x1,y1,x2,y2){
   }
   
   
-  return(h2*3/4+h)
+  #return(h2*1/4+h)
+  return(h)
 }
 
 
@@ -61,10 +62,22 @@ for (i in 1:dim(pythondata)[1])
     grid.training = rbind(grid.training,c(pythondata[i,1],pythondata[i,2]))
     
   }
+Plane_path = matrix(0, nrow=0, ncol=2)
+
+pythondata = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv");
+
+for (i in 1:dim(pythondata)[1])
+{
+  
+  
+  Plane_path = rbind(Plane_path,c(pythondata[i,1],pythondata[i,2]))
+  
+}
+
 
 training_size = dim(grid.training)[1]
 
-if(training_size != prev_training_size)
+if(training_size != prev_training_size & training_size > 3)
 {
 prev_training_size = training_size  
 ngrid.training = dim(grid.training)[1]
@@ -208,8 +221,10 @@ else
 par(mar=c(4,4,1,1)+0.2)
 # image(matrix(y.mean, nrow=ngrid, ncol=ngrid), col = heat.colors(50),ylab="Longitude", xlab="Latitude")
 image.plot(matrix(y.mean, nrow=ngrid, ncol=ngrid), col = heat.colors(100),ylab="Longitude", xlab="Latitude")
+
 title(main = "Predicted Plume", font.main = 4)
 points(grid.training[,1], grid.training[,2], pch=19)
+
 
 points(s.max.f.estimated[1], s.max.EI.estimated[2], pch=19)
 text(s.max.f.estimated[1]+.02, s.max.EI.estimated[2]+0.02, "Estimated maximum", pos=4)
@@ -220,21 +235,44 @@ pic_count = pic_count+1
 Sys.sleep(0.2) 
 
 
+if(init == 0)
+{
+  X11()
+}
+else
+{
+  dev.set(dev.list()[4])
+}
+image.plot(matrix(y.mean, nrow=ngrid, ncol=ngrid), col = heat.colors(100),ylab="Longitude", xlab="Latitude")
+title(main = "Predicted Plume with Path", font.main = 4)
+
 print("DONE FIRST RUN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-
-#This appends the next measured value to the training grid
-#grid.training = rbind(grid.training,c(s.max.EI.estimated[1],s.max.EI.estimated[2]))
-
-
+points(Plane_path[,1], Plane_path[,2], pch=20, cex=.2)
+dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
+dev.off ();
+pic_count = pic_count+1
 
 # if(count == 5)
 # {
 #   grid.training = rbind(grid.training,c(0.75,0.75))
 # }
-
-
-
+if (dim(grid.training)[1] > 8)
+{
+  R_data = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv");
+  grid.training2 = matrix(0, nrow=0, ncol=2)
+  for (i in 1:dim(R_data)[1])
+  {
+    print(R_data[i,1])
+    grid.training2 = rbind(grid.training2,c(R_data[i,1],R_data[i,2]))
+    
+  }
+  #This appends the next measured value to the training grid
+  grid.training2 = rbind(grid.training2,c(s.max.EI.estimated[1],s.max.EI.estimated[2]))
+  
+  
+  write.csv(grid.training2, file = "C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv", row.names = FALSE)
+}
 
 predicted = matrix(y.mean, nrow=ngrid, ncol=ngrid)
 actual = matrix(truehumidity, nrow=ngrid, ncol=ngrid)
@@ -256,7 +294,7 @@ if(init == 0)
 }
 else
 {
-  dev.set(dev.list()[4])
+  dev.set(dev.list()[5])
 }
 
 old.par <- par(mfrow=c(2, 1))
@@ -291,7 +329,7 @@ if(init == 0)
 }
 else
 {
-  dev.set(dev.list()[5])
+  dev.set(dev.list()[6])
   points(count,percent)
 }
 
