@@ -105,8 +105,8 @@ while True:
 
     if wp_count >= (i_row -1) and i_row != 0:
         wp_count = i_row -1
-#        
-#    if wp_count >= 10:
+        
+#    if wp_count >= 9:
 #        wp_count = i_row - 1
     print 'Running 1'
     try:
@@ -159,7 +159,7 @@ while True:
             wp_dst = float(list[position+1])
          
             print 'Checking wpdst'
-            if wp_dst < 130:
+            if wp_dst < 120:
                 if wp_count != prev_wp_count:
                     start_time = cur_time
                     prev_wp_count = wp_count

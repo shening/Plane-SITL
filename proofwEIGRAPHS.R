@@ -31,7 +31,7 @@ humidity = function(s,x1,y1,x2,y2){
   }
   
   
-  #return(h2*1/4+h)
+  #return(h2*3/4+h)
   return(h)
 }
 
@@ -320,6 +320,7 @@ diffmean = mean(rowMeans(diff))
 truemean = mean(rowMeans(matrix(truehumidity, nrow=ngrid, ncol=ngrid)))
 
 percent = (diffmean/truemean )*100
+print(percent)
 
 if(init == 0)
 {
@@ -354,8 +355,9 @@ init = 1
 else
 {Sys.sleep(0.2) 
  print(paste("NO NEW DATA!!!")) }
-}
 
+
+}
 
 
 # dev.set(dev.list()[1])
