@@ -106,7 +106,7 @@ while True:
     if wp_count >= (i_row -1) and i_row != 0:
         wp_count = i_row -1
         
-#    if wp_count >= 9:
+#    if wp_count > 9:
 #        wp_count = i_row - 1
     print 'Running 1'
     try:
@@ -142,7 +142,7 @@ while True:
                     Pl_file.write("%f" % cur_x )
                     Pl_file.write(",%f\n" % cur_y)
                     Pl_file.close()
-            if float(cur_time - start_time) > 15 and grid_nav == 1:
+            if float(cur_time - start_time) > 10 and grid_nav == 1:
                 start_time = cur_time
                 
                 Plane_pos = numpy.vstack([Plane_pos,cur_pos])
@@ -161,9 +161,9 @@ while True:
             print 'Checking wpdst'
             if wp_dst < 120:
                 if wp_count != prev_wp_count:
-                    start_time = cur_time
+                    #start_time = cur_time
                     prev_wp_count = wp_count
-                    Plane_pos = numpy.vstack([Plane_pos,cur_pos])
+                    #Plane_pos = numpy.vstack([Plane_pos,cur_pos])
                     print 'Writing Currest Plane position'
                     with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb') as Pl_file:
                         writer = csv.writer(Pl_file)

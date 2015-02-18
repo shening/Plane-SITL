@@ -22,19 +22,31 @@ construct.Omega = function(s1, s2, tau2, lambda){
 
 ##Function that evaluates the true underlying function that generates the data
 humidity = function(s,x1,y1,x2,y2){
-  s.maxh1 = c(x1,y1)  #Coordinates of the maximum of the humidity function
-  s.maxh2 = c(x2,y2)
-  n = dim(s)[1]
-  h = rep(0, n)
-  h2 = rep(0, n)
-  for(i in 1:n){
-    h[i] = exp(-2*sum((s[i,]-s.maxh1)^2))
-    h2[i] = exp(-6*sum((s[i,]-s.maxh2)^2))
-  }
+#   s.maxh1 = c(x1,y1)  #Coordinates of the maximum of the humidity function
+#   s.maxh2 = c(x2,y2)
+#   n = dim(s)[1]
+#   h = rep(0, n)
+#   h2 = rep(0, n)
+#   for(i in 1:n){
+#     h[i] = exp(-2*sum((s[i,]-s.maxh1)^2))
+#     h2[i] = exp(-6*sum((s[i,]-s.maxh2)^2))
+#   }
+#   
+
+    s      = matrix(s,ncol=2)
+    s.max1 = c(0.25,0.25)
+    s.max2 = c(0.75,0.75)  
+    n      = dim(s)[1]
+    h      = rep(0, n)
+    for(i in 1:n){
+      h[i] = 0.75*exp(-10*sum((s[i,]-s.max1)^2)) + exp(-10*sum((s[i,]-s.max2)^2))
+    }
+    return(h)
+  
   
   
   #return(h2*3/4+h)
-  return(h)
+  #return(h)
 }
 
 
@@ -170,7 +182,7 @@ y.var=sigma2+tau2-diag(Omegapo%*%Omegaoo.inv%*%t(Omegapo)+Omegapo%*%Omegaoo.inv%
 
 
 ## Calculate expected improvement over the working grid
-y.max=1.0*max(y)
+y.max=1.4*max(y)
 EI = sqrt(y.var)*dnorm((y.mean-y.max)/sqrt(y.var))+(y.mean-y.max)*pnorm((y.mean-y.max)/sqrt(y.var))
 
 
@@ -228,8 +240,8 @@ title(main = "Predicted Plume", font.main = 4)
 points(grid.training[,1], grid.training[,2], pch=19)
 
 
-points(s.max.f.estimated[1], s.max.EI.estimated[2], pch=19)
-text(s.max.f.estimated[1]+.02, s.max.EI.estimated[2]+0.02, "Estimated maximum", pos=4)
+points(s.max.f.estimated[1], s.max.f.estimated[2], pch=19)
+text(s.max.f.estimated[1]+.02, s.max.f.estimated[2]+0.02, "Estimated maximum", pos=4)
 dev.print(dev=pdf, file="function_est.pdf")
 dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
 dev.off ();
@@ -250,7 +262,7 @@ title(main = "Predicted Plume with Path", font.main = 4)
 
 print("DONE FIRST RUN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-points(Plane_path[,1], Plane_path[,2], pch=20, cex=.2)
+points(Plane_path[,1], Plane_path[,2], pch=20, cex=.2);
 dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
 dev.off ();
 pic_count = pic_count+1
@@ -336,6 +348,16 @@ else
   points(count,percent)
 }
 
+max_est_x = grid[which.max(y.mean),][1];
+max_est_y = grid[which.max(y.mean),][2];
+distance = sqrt ((0.747-max_est_x)^2+(0.747-max_est_y)^2);
+
+if(distance <= 0.04)
+{
+  
+  print(paste("MAX FOUND!!!!!!!!!!!!!!!")) 
+  
+}
 
 # if(init == 0)
 # {
