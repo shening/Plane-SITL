@@ -3,6 +3,7 @@ import re
 import time
 import numpy
 import csv
+import shutil
 
 
 TCP_IP = '127.0.0.1'
@@ -24,10 +25,33 @@ conn.settimeout(5.0)
 #----------------------------------------
 #Config plume box
 #------------------------------------
+simulation_iter = 1
+A = []
+header = 'QGC WPL 110\n'
+i_row = 0
+with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/boundary2.txt', 'rb') as f:
+    reader = csv.reader(f,delimiter='\t')
+    for row in reader:
+        if i_row == 0:
+            x = 0
+            i_row+=1
+        elif i_row == 1:
+            A.append(row)
+            i_row+=1
+        else:
+            A = numpy.vstack([A,row])
+        
+        
+with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/pythonboundary.csv', 'wb') as f:
+    writer = csv.writer(f)
+    f.write(header)
+    writer.writerows(A)
+    
+    
 
 plume_box = []
-f = open("C:/Users/sebas_000/Documents/Programming/Plane-SITL/boundary2.txt")
-parser = csv.reader(f, delimiter='\t')
+f = open("C:/Users/sebas_000/Documents/Programming/Plane-SITL/pythonboundary.csv")
+parser = csv.reader(f, delimiter=',')
 row_init = 0
   
 for row in parser:
@@ -80,15 +104,95 @@ Plane_pos = ['V1', 'V2']
 #Plane_pos = numpy.vstack([Plane_pos,[0.2,0.3]])
 #Plane_pos = numpy.vstack([Plane_pos,[0.5,0.4]])
 
+#---reset sampled points and log flight
+f = open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb')
+f.write('0,0\n')   
 
+f = open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv', 'wb')
+f.write('0,0\n')     
+#-----------------------------------------------------------
+        
+        
 start_time = time.time()
 
 while True:
  
 
 
+    with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_number.csv', 'rb') as f:
+     reader = csv.reader(f,delimiter='\t')
+     for row in reader:
+         prev_iter = simulation_iter
+         simulation_iter = int(row[0])
     
+    if prev_iter != simulation_iter :
+        
+        
+        #-----------Save old files
+       
+
+
+        shutil.copy2('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv', 'C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log'+str(simulation_iter)+'.csv')
+        
+        shutil.copy2('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints'+str(simulation_iter)+'.csv')
+                 
+        #----------------Write new plumebox
+        plume_box[4][8] = plume_box[2][8]
+        plume_box[4][9] = plume_box[2][9]
+        plume_box[1][8] = plume_box[4][8]
+        plume_box[1][9] = float(plume_box[4][9]) + DeltaLong
+        plume_box[2][8] = float(plume_box[4][8]) + DeltaLat
+        plume_box[2][9] = float(plume_box[4][9]) + DeltaLong
+        plume_box[3][8] = float(plume_box[4][8]) + DeltaLat
+        plume_box[3][9] = plume_box[4][9] 
+        
+        
+        with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/pythonboundary.txt', 'wb') as f:
+            writer = csv.writer(f)
+            f.write(header)
+            writer.writerows(plume_box)      
+            
+        #-----------------------------------
     
+       # time.sleep(1)
+        with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv', 'rb') as R_file:
+            reader = csv.reader(R_file)
+            A = []
+            i_row = 0
+            for row in reader:
+                if i_row == 0:
+                    A.append(row)
+                    i_row+=1
+                else:
+                    A = numpy.vstack([A,row])
+                    i_row+=1
+    
+        #=----------REINITIALISE AND RESEND FIRST WAYPOINT
+        prev_wp_count = 0
+        wp_count = 1
+        if A[wp_count][0]:
+            x = float(A[wp_count][0])
+            y = float(A[wp_count][1])
+            lat = float(plume_box[4][8]) + y*DeltaLat
+            lng = float(plume_box[4][9]) + x*DeltaLong
+            alt = 200
+            msg = '|'+'alt'+'|'+str(alt)+'|'+'lat'+'|'+str(lat)+'|'+'lng'+'|'+str(lng)+'|'
+            
+            conn.send(msg)
+            print msg
+        #--------------------------------------
+        #---reset sampled points and log flight
+        f = open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb')
+        f.write('0,0\n')   
+        
+        f = open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv', 'wb')
+        f.write('0,0\n')     
+        Plane_pos = ['V1', 'V2']
+        #-----------------------------------------------------------
+            
+
+        
+        
     with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv', 'rb') as R_file:
         reader = csv.reader(R_file)
         A = []
@@ -106,8 +210,9 @@ while True:
     if wp_count >= (i_row -1) and i_row != 0:
         wp_count = i_row -1
         
-#    if wp_count > 9:
-#        wp_count = i_row - 1
+        
+    if wp_count > 9 and i_row > 2:
+        wp_count = i_row - 1
     print 'Running 1'
     try:
         print 'Receiving Data'
@@ -136,21 +241,26 @@ while True:
             cur_x = (cur_lng - float(plume_box[4][9]))/DeltaLong
             cur_pos = [cur_x, cur_y]
             cur_time = time.time()
-            with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv', 'a') as Pl_file:
-                    #writer = csv.writer(Pl_file)
-                    #writer.writerows(cur_pos)
-                    Pl_file.write("%f" % cur_x )
-                    Pl_file.write(",%f\n" % cur_y)
-                    Pl_file.close()
-            if float(cur_time - start_time) > 10 and grid_nav == 1:
-                start_time = cur_time
-                
-                Plane_pos = numpy.vstack([Plane_pos,cur_pos])
-                print 'Writing Currest Plane position'
-                with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'wb') as Pl_file:
-                    writer = csv.writer(Pl_file)
-                    writer.writerows(Plane_pos)
-                    Pl_file.close()
+            if cur_y >= 0 and cur_x >= 0:
+                with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv', 'a') as Pl_file:
+                        #writer = csv.writer(Pl_file)
+                        #writer.writerows(cur_pos)
+                        Pl_file.write("%f" % cur_x )
+                        Pl_file.write(",%f\n" % cur_y)
+                        Pl_file.close()
+            if cur_y >= 0 and cur_x >= 0:            
+                if float(cur_time - start_time) > 7 and grid_nav == 1:
+                    start_time = cur_time
+                    
+                    Plane_pos = numpy.vstack([Plane_pos,cur_pos])
+                    print 'Writing Currest Plane position'
+                    with open('C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv', 'a') as Pl_file:
+#                        writer = csv.writer(Pl_file)
+#                        writer.writerows(Plane_pos)
+                        Pl_file.write("%f" % cur_x )
+                        Pl_file.write(",%f\n" % cur_y)
+                        
+                        Pl_file.close()
         elif item == "gndspeed":
             print "Groundspeed:", list[position+1]
             cur_gndspeed = list[position+1]
@@ -169,16 +279,17 @@ while True:
                         writer = csv.writer(Pl_file)
                         writer.writerows(Plane_pos)
                         Pl_file.close()
-                x = float(A[wp_count][0])
-                y = float(A[wp_count][1])
-                lat = float(plume_box[4][8]) + y*DeltaLat
-                lng = float(plume_box[4][9]) + x*DeltaLong
-                alt = 150
-                msg = '|'+'alt'+'|'+str(alt)+'|'+'lat'+'|'+str(lat)+'|'+'lng'+'|'+str(lng)+'|'
-                wp_count += 1
-                for i in range(1,4):
-                    conn.send(msg)
-                    data = conn.recv(BUFFER_SIZE)
+                if A[wp_count][0]:
+                    x = float(A[wp_count][0])
+                    y = float(A[wp_count][1])
+                    lat = float(plume_box[4][8]) + y*DeltaLat
+                    lng = float(plume_box[4][9]) + x*DeltaLong
+                    alt = 150
+                    msg = '|'+'alt'+'|'+str(alt)+'|'+'lat'+'|'+str(lat)+'|'+'lng'+'|'+str(lng)+'|'
+                    wp_count += 1
+                    for i in range(1,4):
+                        conn.send(msg)
+                        data = conn.recv(BUFFER_SIZE)
                     
             
                 

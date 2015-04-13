@@ -57,36 +57,64 @@ init = 0
 zlim <- c(0,1.5)
 pic_count = 0
 
-
+#-------reset simulation number to 1 before each run
+simulation_number = 1
+write (simulation_number, file = "C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_number.csv", ncolumns = 2, append = FALSE,
+       sep = " ") 
 prev_training_size = 0
+#-------------------------
 
-while(count < 2000)
+
+
+#-----Copying initial R_nav_coordinatres
+
+R_data = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv");
+grid.training_initial = matrix(0, nrow=0, ncol=2)
+for (i in 1:dim(R_data)[1])
+{
+  print(R_data[i,1])
+  grid.training_initial = rbind(grid.training_initial,c(R_data[i,1],R_data[i,2]))
+  
+}
+
+#--------------------------------------------------
+while(count < 200000)
 {
 
   
+  print("1")
 
 grid.training = matrix(0, nrow=0, ncol=2)
   
-pythondata = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv");
+
+
+#if(file.info("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv")$size != 0)
+{
+  #try(expr, silent = FALSE)
+  pythondata = try( read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints.csv"), silent = TRUE)
   
-for (i in 1:dim(pythondata)[1])
+  for (i in 1:dim(pythondata)[1])
   {
     
     
     grid.training = rbind(grid.training,c(pythondata[i,1],pythondata[i,2]))
     
   }
-Plane_path = matrix(0, nrow=0, ncol=2)
-
-pythondata = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv");
-
-for (i in 1:dim(pythondata)[1])
-{
-  
-  
-  Plane_path = rbind(Plane_path,c(pythondata[i,1],pythondata[i,2]))
-  
 }
+
+Plane_path = matrix(0, nrow=0, ncol=2)
+print("2")
+
+ planepath =try(read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/Plane_flightpoints_log.csv"), silent = TRUE)
+  
+  for (i in 1:dim(planepath)[1])
+  {
+    
+    
+    Plane_path = rbind(Plane_path,c(planepath[i,1],planepath[i,2]))
+    
+  }
+
 
 
 training_size = dim(grid.training)[1]
@@ -128,13 +156,13 @@ title(main = "Actual Plume", font.main = 4)
 points(grid.training[,1], grid.training[,2], pch=19)
 
 dev.print(dev=pdf, file="poc_true.pdf")
-dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
+dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/",simulation_number,"pic",pic_count,".jpg"))
 dev.off ();
 pic_count = pic_count+1
 
 
 ##Generate the actual observations over the training grid (these involve noise)
-traininghumidity = humidity(grid.training,0.8, 0.8,0.1,0.0) + rnorm(ngrid.training, 0, 0.025)
+traininghumidity = humidity(grid.training,0.8, 0.8,0.1,0.0) + rnorm(ngrid.training, 0, 0.04)
 
 
 ## Negative of marginal likelihood function. Target for optimal hyperparameter selection. 
@@ -214,7 +242,7 @@ points(grid.training[,1], grid.training[,2], pch=19)
 points(s.max.EI.estimated[1], s.max.EI.estimated[2], pch=19)
 text(s.max.EI.estimated[1]+.02, s.max.EI.estimated[2]+0.02, paste("Max EI:",EI[which.max(EI)]), pos=4)
 dev.print(dev=pdf, file="expectedimprovement_est.pdf")
-dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
+dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/",simulation_number,"pic",pic_count,".jpg"))
 dev.off ();
 pic_count = pic_count+1
 
@@ -243,7 +271,7 @@ points(grid.training[,1], grid.training[,2], pch=19)
 points(s.max.f.estimated[1], s.max.f.estimated[2], pch=19)
 text(s.max.f.estimated[1]+.02, s.max.f.estimated[2]+0.02, "Estimated maximum", pos=4)
 dev.print(dev=pdf, file="function_est.pdf")
-dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
+dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/",simulation_number,"pic",pic_count,".jpg"))
 dev.off ();
 pic_count = pic_count+1
 Sys.sleep(0.2) 
@@ -263,7 +291,7 @@ title(main = "Predicted Plume with Path", font.main = 4)
 print("DONE FIRST RUN!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
 points(Plane_path[,1], Plane_path[,2], pch=20, cex=.2);
-dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
+dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/",simulation_number,"pic",pic_count,".jpg"))
 dev.off ();
 pic_count = pic_count+1
 
@@ -273,6 +301,7 @@ pic_count = pic_count+1
 # }
 if (dim(grid.training)[1] > 8)
 {
+  print("3")
   R_data = read.csv("C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv");
   grid.training2 = matrix(0, nrow=0, ncol=2)
   for (i in 1:dim(R_data)[1])
@@ -286,6 +315,7 @@ if (dim(grid.training)[1] > 8)
   
   
   write.csv(grid.training2, file = "C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv", row.names = FALSE)
+  #cat(grid.training2[last], file="", sep="\n", append=TRUE)
 }
 
 predicted = matrix(y.mean, nrow=ngrid, ncol=ngrid)
@@ -322,7 +352,7 @@ par(old.par)
 # plot(act)
 # title(main = "Actual vs predicted(red)", font.main = 4)
 # points(pred,col= "red")
-dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/pic",pic_count,".jpg"))
+dev.copy(jpeg,filename=paste("C:/Users/sebas_000/Documents/R code/",simulation_number,"pic",pic_count,".jpg"))
 dev.off ();
 pic_count = pic_count+1
 
@@ -355,8 +385,18 @@ distance = sqrt ((0.747-max_est_x)^2+(0.747-max_est_y)^2);
 if(distance <= 0.04)
 {
   
+ # When the max is found increment the simulation number  
   print(paste("MAX FOUND!!!!!!!!!!!!!!!")) 
-  
+  simulation_number =  simulation_number + 1
+  write (simulation_number, file = "C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_number.csv", ncolumns = 2, append = FALSE,
+         sep = " ") 
+  #  write(simulation_number, file = "C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_number.csv", row.names = FALSE)
+  # Write over initial samlping points again
+  write.csv(grid.training_initial, file = "C:/Users/sebas_000/Documents/Programming/Plane-SITL/R_nav_coordinates.csv", row.names = FALSE)
+  count = 0
+  y = 0
+  prevcount = 0
+  Sys.sleep(2)
 }
 
 # if(init == 0)

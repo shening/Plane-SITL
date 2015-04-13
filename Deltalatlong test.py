@@ -29,6 +29,7 @@ check = 0
 #Use the 4th waypoint (there are 4 waypoints in counter clockwise orientation starting in lower right corner)
 Lat = float(arrays[4][8]) + y*DeltaLat
 Long = float(arrays[4][9]) + x*DeltaLong
+
 print Lat
 print Long
 
